@@ -1,0 +1,22 @@
+name: Check and deploy to testing
+on:
+  workflow_dispatch:
+  push:
+    branches:
+    - main
+    paths:
+    - 'src/**'
+
+jobs:
+  check-test:
+    runs-on: ubuntu-latest
+    environment: testing
+    steps:
+    - uses: niaid/proc-collab-popl-actions/deploy-solution@main
+      with:
+        environment-url: ${{ secrets.ENVIRONMENT_URL }}
+        app-id: ${{ secrets.APP_ID }}
+        tenant-id: ${{ secrets.TENANT_ID }}
+        client-secret: ${{ secrets.CLIENT_SECRET }}
+        deploy-settings: testing.deploymentSettings.json
+        check-solution: true

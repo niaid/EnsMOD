@@ -1,0 +1,16 @@
+name: Release to production
+on:
+  workflow_dispatch:
+
+jobs:
+  release-prod:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+    - uses: niaid/proc-collab-popl-actions/deploy-solution@main
+      with:
+        environment-url: ${{ secrets.ENVIRONMENT_URL }}
+        app-id: ${{ secrets.APP_ID }}
+        tenant-id: ${{ secrets.TENANT_ID }}
+        client-secret: ${{ secrets.CLIENT_SECRET }}
+        deploy-settings: production.deploymentSettings.json

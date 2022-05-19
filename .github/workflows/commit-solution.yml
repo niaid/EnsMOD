@@ -1,0 +1,17 @@
+name: Commit latest solution
+on:
+  workflow_dispatch:
+
+jobs:
+  commit-solution:
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+    - uses: niaid/proc-collab-popl-actions/commit-solution@main
+      with:
+        environment-url: ${{ secrets.ENVIRONMENT_URL }}
+        solution-name: ${{ secrets.SOLUTION_NAME }}
+        app-id: ${{ secrets.APP_ID }}
+        tenant-id: ${{ secrets.TENANT_ID }}
+        client-secret: ${{ secrets.CLIENT_SECRET }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
