@@ -1,4 +1,4 @@
-# Process & Collab Solution Template
+# EnsMOD: An R Script for Omics Sample Outlier Detection
 
   [Development Solution](#) 
 • [Testing Solution](#)
