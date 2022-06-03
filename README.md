@@ -71,7 +71,7 @@ input_data <- readxl::read_xlsx("./your_data_file.xlsx", skip = 0, col_names = T
 **Jian Song,**
 **Aleksandra Nita-Lazar**
 
-Contact us at <a href="mailto:EnMOD-team@nih.gov">EnMOD-team@nih.gov</a>  
+Contact us at <a href="mailto:EnMOD-team@nih.gov">EnsMOD-team@nih.gov</a>  
 
 ## Acknowledgements
 
