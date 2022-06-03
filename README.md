@@ -1,15 +1,15 @@
 # EnsMOD: An R Script for Omics Sample Outlier Detection
 
-Detection of omics sample outliers is important for preventing erroneous biological conclusions, developing robust experimental protocols, and discovering rare biological states. Two recent publications (Chen et al 2020 & Selicato et al 2021) describe robust algorithms for detecting transcriptomic sample outliers, but neither algorithm had been incorporated into a software tool for omics scientists. 
+Detection of omics sample outliers is important for preventing erroneous biological conclusions, developing robust experimental protocols, and discovering rare biological states. Two recent publications (*Chen et al 2020 & Selicato et al 2021**) describe robust algorithms for detecting transcriptomic sample outliers, but neither algorithm had been incorporated into a software tool for omics scientists. 
 
-Here we describe our R script Ensemble Methods for Outlier Detection (EnsMOD) which incorporates both algorithms. EnsMOD calculates how closely the quantitation variation follows a normal distribution, plots the density curves of each sample to visualize anomalies, performs hierarchical cluster analyses to calculate how closely the samples cluster with each other, and performs robust principal component analyses to statistically test if any sample is an outlier. The probabilistic threshold parameters can be easily adjusted to tighten or loosen the outlier detection stringency. 
+Here we describe our R script Ensemble Methods for Outlier Detection (**EnsMOD**) which incorporates both algorithms. **EnsMOD** calculates how closely the quantitation variation follows a normal distribution, plots the density curves of each sample to visualize anomalies, performs hierarchical cluster analyses to calculate how closely the samples cluster with each other, and performs robust principal component analyses to statistically test if any sample is an outlier. The probabilistic threshold parameters can be easily adjusted to tighten or loosen the outlier detection stringency. 
 
-EnsMOD was used to analyze a simulated proteomics dataset, a multiomic (proteome and transcriptome) dataset, a single-cell proteomics dataset, and a phosphoproteomics dataset. EnsMOD successfully identified all of the simulated outliers, and outlier removal improved data quality for downstream statistical analyses. 
+**EnsMOD** was used to analyze a simulated proteomics dataset, a multiomic (proteome and transcriptome) dataset, a single-cell proteomics dataset, and a phosphoproteomics dataset. EnsMOD successfully identified all of the simulated outliers, and outlier removal improved data quality for downstream statistical analyses. 
 
 
 ## Prerequisites
 
-To run EnsMOD, R and Rstudio should be installed and running on your machine. Instructions are available for R installation and for RStudio installation. In addition, the following R packages are also required for EnsMOD to work on your machine. 
+To run **EnsMOD**, R and Rstudio should be installed and running on your machine. Instructions are available for R installation and for RStudio installation. In addition, the following R packages are also required for EnsMOD to work on your machine. 
 
 ```code
 library(cluster) 
