@@ -25,14 +25,14 @@ library(fitdistrplus)
 
 ## Getting Started
 
-**EnsMOD** is run as a Rmarkdown (*Ensemble_Methods_for_Outlier_Detection_v2_0.Rmd*) in RStudio. It will explicitly link your data with the R codes and output creating a fully reproducible workflow. The output can be used as a report or for presentation and sharing to facilitate your collaboration. 
+**EnsMOD** is run as a Rmarkdown (*'Ensemble_Methods_for_Outlier_Detection_v2_0.Rmd'*) in RStudio. It will explicitly link your data with the R codes and output creating a fully reproducible workflow. The output can be used as a report or for presentation and sharing to facilitate your collaboration. 
 
 Before you run **EnsMOD** on your own data, we provide four different datasets (<i>EnsMOD_Examples</i>) for you to practice with these examples. A brief description of these datasets can be found <a href="./EnsMOD_Examples/EnsMOD_Examples_description.txt" target="_blank">here</a>. You can download them as a ZIP file <a href="./EnsMOD_Examples.zip" download>EnsEMOD_Examples.zip</a> 
 
-**EnsMOD** can be downloaded as *Ensemble_Methods_for_Outlier_Detection_v2_0.Rmd*. You will place a copy of the **EnsMOD** Rmarkdown file into each example data folder. Open the EnsMOD Rmarkdown file in RStudio and change the title of the file to correspond to the input data. You can run the EnsMOD Rmarkdown file in RStudio by clicking *knitt* . You can compare your output with the *Ensemble_Methods_for_Outlier_Detection_v2_0.html* that we generated in the folder. 
+**EnsMOD** can be downloaded as *'Ensemble_Methods_for_Outlier_Detection_v2_0.Rmd'*. You will place a copy of the **EnsMOD** Rmarkdown file into each example data folder. Open the EnsMOD Rmarkdown file in RStudio and change the title of the file to correspond to the input data. You can run the EnsMOD Rmarkdown file in RStudio by clicking *knitt* . You can compare your output with the *'Ensemble_Methods_for_Outlier_Detection_v2_0.html'* that we generated in the folder. 
 
 Once you run those examples without any issues, you are ready to run on your own data.
-Again, copy *Ensemble_Methods_for_Outlier_Detection_v2_0.Rmd* to the folder with your own input data file. Besides changing the title of the Rmarkdown file:
+Again, copy *'Ensemble_Methods_for_Outlier_Detection_v2_0.Rmd'* to the folder with your own input data file. Besides changing the title of the Rmarkdown file:
 
 ```Code
 From:
