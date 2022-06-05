@@ -73,7 +73,4 @@ input_data <- readxl::read_xlsx("./your_data_file.xlsx", skip = 0, col_names = T
 
 Contact us at <a href="mailto:EnMOD-team@nih.gov">EnsMOD-team@nih.gov</a>  
 
-## Acknowledgements
-
-* We want to thank Dr. Ronald Germain for his helpful discussions and critical feedbacks.  
 
