@@ -1,4 +1,6 @@
-# EnsMOD: An R Script for Omics Sample Outlier Detection
+# EnsMOD
+
+### An R Script for Omics Sample Outlier Detection
 
 Detection of omics sample outliers is important for preventing erroneous biological conclusions, developing robust experimental protocols, and discovering rare biological states. Two recent publications (*Chen et al 2020 & Selicato et al 2021*) describe robust algorithms for detecting transcriptomic sample outliers, but neither algorithm had been incorporated into a software tool for omics scientists. 
 
