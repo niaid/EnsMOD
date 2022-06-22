@@ -70,7 +70,7 @@ input_data <- readxl::read_xlsx("./your_data_file.xlsx", skip = 0, col_names = T
 ## Authors
 
 **Nathan Manes,**
-**Jian Song,**
+**Jian Song ** and
 **Aleksandra Nita-Lazar**
 
 Contact us at <a href="mailto:EnMOD-team@nih.gov">EnsMOD-team@nih.gov</a>  
