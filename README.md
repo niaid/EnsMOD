@@ -37,7 +37,7 @@ library(fitdistrplus)
 
 **EnsMOD** is run as a Shiny App from RStudio. It will also explicitly link your data with the R codes and results as a Rmarkdown html file, which can be used as a report or for presentation and sharing to facilitate your collaboration. All of the results are saved in the <i>EnsMODoutputs</i> folder (<i>~/EnsMOD/app/www/EnsMODoutpupts/</i>).  
 
-Before you run **EnsMOD** on your own data, we provide four different sample datasets (<i>EnsMOD_Examples</i>) for you to practice with. A brief description of these sample datasets can be found <a href="./EnsMOD_Examples/EnsMOD_Examples_description.txt" target="_blank">here</a>. You can download them as a ZIP file <a href="./EnsMOD_Examples.zip" download>EnsEMOD_Examples.zip</a> 
+Before you run **EnsMOD** on your own data, we provide four different sample datasets (<i>EnsMOD-Examples</i>) for you to practice with. A brief description of these sample datasets can be found <a href="./app/EnsMOD_Examples/EnsMOD_Examples_description.txt" target="_blank">here</a>. You can download them as a ZIP file <a href="./app/EnsMOD_Examples.zip" download>EnsEMOD_Examples.zip</a> 
 
 **EnsMOD** can be downloaded here by executing the following code in a terminal. But you may need to install <i><a href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git" target="_blank">git</a></i> on you computer if you do not have a it installed already. 
 
@@ -45,7 +45,7 @@ Before you run **EnsMOD** on your own data, we provide four different sample dat
 git clone git@github.com:niaid/EnsMOD.git
 ```
 
-Once downloaded from GitHub, open the <i>app.R</i> file in the <i>EnsMOD/app/</i> folder in RStudio. Clicking 'Run App' will start EnsMOD app with a Shiny popup window and then clicking 'Open in Browser' on the top of the popup window (<i>see the figure below</i>) to open a browser window. From the browser window you test run EnsMOD app using the <i>EnsMOD_Examples</i> files. Once you run those sample data without any issues, you are ready to run EnsMOD analysis on your own data.
+Once downloaded from GitHub, open the <i>app.R</i> file in the <i>EnsMOD/app/</i> folder in RStudio. Clicking 'Run App' will start EnsMOD app with a Shiny popup window and then clicking 'Open in Browser' on the top of the popup window (<i>see the figure below</i>) to start. From the browser window you can test run EnsMOD app using the <i>EnsMOD_Examples</i> files. Once you run those sample data without any issues, you are ready to run EnsMOD analysis on your own data.
 
 ![Figure1](./app/www/images/EnsMOD_Rstudio_ShinyApp.png)
 
