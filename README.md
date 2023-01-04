@@ -53,7 +53,7 @@ The results from EnsMOD analysis are presented in several tab (<i>below<i>) and 
 
 ![Home](./app/www/images/EnsMOD_home.png)
 ![DensityPlot](./app/www/images/EnsMOD_DensityPlot.png)
-![Hierarchical Clustering](./app/www/images/EnsMOD_HierarchicalClustering.png)
+![Hierarchical Clustering](./app/www/images/EnsMOD_Hierarchical_Clustering.png)
 ![PcaGrid](./app/www/images/EnsMOD_PcaGrid.png)
 ![Outliers](./app/www/images/EnsMOD_outliers.png)
 ![Rmarkdown](./app/www/images/EnsMOD_Rmarkdown.png)
