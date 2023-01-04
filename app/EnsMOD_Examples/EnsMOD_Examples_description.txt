@@ -1,0 +1,39 @@
+Anthrax Spleen Phosphoproteomics:
+Manes NP, Dong L, Zhou W et al. Discovery of mouse spleen signaling responses to anthrax using label-free quantitative phosphoproteomics via mass spectrometry. Mol Cell Proteomics 2011; 10:M110 000927; doi: 10.1074/mcp.M110.000927
+EnsMOD Input Table: Supplemental Table 4 - Phosphopeptide Quantitation Values.
+The data were globally normalized by dividing the abundance values with the GlobalNormAbundance values.
+Then the data were Log10-transformed.
+
+
+
+Germ-Free Mouse Ileum:
+Manes NP, Shulzhenko N, Nuccio AG et al. Multi-omics Comparative Analysis Reveals Multiple Layers of Host Signaling Pathway Regulation by the Gut Microbiota. mSystems 2017; 2:e00107-17; doi: 10.1128/mSystems.00107-17
+EnsMOD Input Table - Proteome: Table S4 "InfernoRDN results from the analysis of the proteome data subset".
+     The data were Log2-transformed.
+EnsMOD Input Table - Transcriptome: Table S3 "InfernoRDN results from the analysis of the transcriptome data subset".
+     The transcriptome dataset was run in two ways
+     EnsMOD v2.0 (unaltered): Ensemble_Methods_for_Outlier_Detection_v2_0.html
+     EnsMOD v2.0 (altered to use normal (i.e., unmodified) Z-scores): Ensemble_Methods_for_Outlier_Detection_v2_0-UnmodifiedZ.html
+          There was only one modification: deletion of "# " at the start of line 110 using RStudio.
+          This enabled: "input_data_nna_ModZ <- t(scale(t(input_data_nna), center = TRUE, scale = TRUE))"
+          Modified Z-scores are robust to outliers (Iglewicz and Hoaglin 1993), but can cause artifacts.
+               Boris Iglewicz and David Hoaglin 1993 "Volume 16: How to Detect and Handle Outliers",
+               The ASQC Basic References in Quality Control: Statistical Techniques, Edward F. Mykytka, Ph.D., Editor.
+
+
+
+SCoPE2 Single-Cell Proteomics:
+Specht H, Emmott E, Petelski AA et al. Single-cell proteomic and transcriptomic analysis of macrophage heterogeneity using SCoPE2. Genome Biol 2021; 22:50; doi: 10.1186/s13059-021-02267-5
+EnsMOD input = "Proteins-processed.csv" (this file is described in the article)
+     Each protein was required to have at least one peptide that had at least 20% (298 of 1490) valid (not missing) values.
+          "Peptides-raw.csv" was used to calculate this (this file is described in the article).
+
+
+
+Simulated Proteomics Data:
+The data were made using "Simulated Proteomics Dataset.xlsx".
+
+
+
+
+
