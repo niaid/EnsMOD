@@ -484,7 +484,7 @@ server <- function(session, input, output){
   })
   
   output$robustOutliers <- renderUI({
-    HTML("<b><br><br><b>By both Robust PCA methods:</b>")
+    HTML("<b><br><br><b>By both Robust PCA Methods:</b>")
   })
   output$robustoutliers <- renderUI({
     robustoutliers <- read.csv("./www/EnsMODoutputs/Outliers_identified_by_both_RobustPCAs.csv")
