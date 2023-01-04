@@ -35,22 +35,28 @@ library(fitdistrplus)
 
 ## Getting Started
 
-**EnsMOD** is run as a Shiny App from RStudio. It will also explicitly link your data with the R codes and output as a Rmarkdown. All of the results are saved in the EnsMODoutputs folder (~/EnsMOD/app/www/EnsMODoutpupts/) and can be used as a report or for presentation and sharing to facilitate your collaboration. 
+**EnsMOD** is run as a Shiny App from RStudio. It will also explicitly link your data with the R codes and output as a Rmarkdown. All of the results are saved in the <i>EnsMODoutputs</i> folder (<i>~/EnsMOD/app/www/EnsMODoutpupts/</i>) and can be used as a report or for presentation and sharing to facilitate your collaboration. 
 
 Before you run **EnsMOD** on your own data, we provide four different datasets (<i>EnsMOD_Examples</i>) for you to practice with these examples. A brief description of these datasets can be found <a href="./EnsMOD_Examples/EnsMOD_Examples_description.txt" target="_blank">here</a>. You can download them as a ZIP file <a href="./EnsMOD_Examples.zip" download>EnsEMOD_Examples.zip</a> 
 
-**EnsMOD** can be downloaded from GitHub (https://github.com/niaid/EnsMOD) by executing the following code in a terminal. But you may need to install git on you computer if you do not have a it installed.
+**EnsMOD** can be downloaded here by executing the following code in a terminal. But you may need to install <i>git</i> on you computer if you do not have a it installed. 
 
 ```code
 git clone git@github.com:niaid/EnsMOD.git
 ```
 
-Once downloaded, open the app.R file in the EnsMOD/app/ folder in RStudio. 
-Once you run those examples without any issues, you are ready to run on your own data.
+Once downloaded, open the <i>app.R</i> file in the <i>EnsMOD/app/</i> folder in RStudio. Clicking 'Run App' will start EnsMOD app with a Shiny popup window (Figure 1) and then clicking 'Open in Browser' on the top of the popup window (Figure 1) to open a browser window. From the browser window you test run EnsMOD app using the <i>EnsMOD_Examples</i> files. Once you run those examples without any issues, you are ready to run EnsMOD analysis on your own data.
 
-![Rstudio]("./images/"EnsMOD_Rstudio_ShinyApp.png", "Figure 1")
+![Figure1]("./images/EnsMOD_Rstudio_ShinyApp.png")
 
+The results from EnsMOD analysis are presented in several tab (<i>below<i>) and can be found in the output folder (<i>EnsMOD/app/www/EnsMODoutputs/<i>).
 
+![Home]("./images/EEnsMOD_home.png")
+![DensityPlot]("./images/EEnsMOD_DensityPlot.png")
+![Hierarchical Clustering]("./images/EEnsMOD_HierarchicalClustering.png")
+![Figure1]("./images/EEnsMOD_PcaGrid.png")
+![Figure1]("./images/EEnsMOD_outliers.png")
+![Figure1]("./images/EEnsMOD_Rmarkdown.png")
 
 ## References
 
