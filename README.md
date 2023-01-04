@@ -51,12 +51,13 @@ Once downloaded, open the <i>app.R</i> file in the <i>EnsMOD/app/</i> folder in 
 
 The results from EnsMOD analysis are presented in several tab (<i>below<i>) and can be found in the output folder (<i>EnsMOD/app/www/EnsMODoutputs/<i>).
 
-![Home](./www/images/EEnsMOD_home.png)
-![DensityPlot](./www/images/EEnsMOD_DensityPlot.png)
-![Hierarchical Clustering](./www/images/EEnsMOD_HierarchicalClustering.png)
-![PcaGrid](./www/images/EEnsMOD_PcaGrid.png)
-![Outliers](./www/images/EEnsMOD_outliers.png)
-![Rmarkdown](./www/images/EEnsMOD_Rmarkdown.png)
+![Home](./app/www/images/EEnsMOD_home.png)
+![DensityPlot](./app/www/images/EEnsMOD_DensityPlot.png)
+![Hierarchical Clustering](./app/www/images/EEnsMOD_HierarchicalClustering.png)
+![PcaGrid](./app/www/images/EEnsMOD_PcaGrid.png)
+![Outliers](./app/www/images/EEnsMOD_outliers.png)
+![Rmarkdown](./app/www/images/EEnsMOD_Rmarkdown.png)
+
 
 ## References
 
