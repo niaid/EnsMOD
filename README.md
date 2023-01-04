@@ -39,7 +39,7 @@ library(fitdistrplus)
 
 Before you run **EnsMOD** on your own data, we provide four different sample datasets (<i>EnsMOD_Examples</i>) for you to practice with. A brief description of these sample datasets can be found <a href="./EnsMOD_Examples/EnsMOD_Examples_description.txt" target="_blank">here</a>. You can download them as a ZIP file <a href="./EnsMOD_Examples.zip" download>EnsEMOD_Examples.zip</a> 
 
-**EnsMOD** can be downloaded here by executing the following code in a terminal. But you may need to install <i><a href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git" target="_blank"">git</a></i> on you computer if you do not have a it installed already. 
+**EnsMOD** can be downloaded here by executing the following code in a terminal. But you may need to install <i><a href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git" target="_blank">git</a></i> on you computer if you do not have a it installed already. 
 
 ```code
 git clone git@github.com:niaid/EnsMOD.git
