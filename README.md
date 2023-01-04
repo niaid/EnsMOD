@@ -47,16 +47,16 @@ git clone git@github.com:niaid/EnsMOD.git
 
 Once downloaded, open the <i>app.R</i> file in the <i>EnsMOD/app/</i> folder in RStudio. Clicking 'Run App' will start EnsMOD app with a Shiny popup window (Figure 1) and then clicking 'Open in Browser' on the top of the popup window (Figure 1) to open a browser window. From the browser window you test run EnsMOD app using the <i>EnsMOD_Examples</i> files. Once you run those examples without any issues, you are ready to run EnsMOD analysis on your own data.
 
-![Figure1]("./images/EnsMOD_Rstudio_ShinyApp.png")
+![Figure1]("./www/images/EnsMOD_Rstudio_ShinyApp.png")
 
 The results from EnsMOD analysis are presented in several tab (<i>below<i>) and can be found in the output folder (<i>EnsMOD/app/www/EnsMODoutputs/<i>).
 
-![Home]("./images/EEnsMOD_home.png")
-![DensityPlot]("./images/EEnsMOD_DensityPlot.png")
-![Hierarchical Clustering]("./images/EEnsMOD_HierarchicalClustering.png")
-![Figure1]("./images/EEnsMOD_PcaGrid.png")
-![Figure1]("./images/EEnsMOD_outliers.png")
-![Figure1]("./images/EEnsMOD_Rmarkdown.png")
+![Home]("./www/images/EEnsMOD_home.png")
+![DensityPlot]("./www/images/EEnsMOD_DensityPlot.png")
+![Hierarchical Clustering]("./www/images/EEnsMOD_HierarchicalClustering.png")
+![PcaGrid]("./www/images/EEnsMOD_PcaGrid.png")
+![Outliers]("./www/images/EEnsMOD_outliers.png")
+![Rmarkdown]("./www/images/EEnsMOD_Rmarkdown.png")
 
 ## References
 
