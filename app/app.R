@@ -1,5 +1,6 @@
 # EnsMOD app
-# December, 2022
+# Jian Song
+# 1/3/2023
 #
 # This is a Shiny web application. You can run the application by clicking
 # the 'Run App' button above.
@@ -13,7 +14,6 @@ library(shiny)
 library(readr)
 library(dplyr)
 library(data.table)
-library(factoextra)
 library(reshape2)
 library(htmltools)
 library(readxl)
