@@ -37,7 +37,7 @@ library(fitdistrplus)
 
 **EnsMOD** is run as a Shiny App from RStudio. It will also explicitly link your data with the R codes and results as a Rmarkdown html file, which can be used as a report or for presentation and sharing to facilitate your collaboration. All of the results are saved in the <i>EnsMODoutputs</i> folder (<i>~/EnsMOD/app/www/EnsMODoutpupts/</i>).  
 
-Before you run **EnsMOD** on your own data, we provide four different sample datasets (<i>EnsMOD-Examples</i>) for you to practice with. A brief description of these sample datasets can be found <a href="./app/EnsMOD_Examples/EnsMOD_Examples_description.txt" target="_blank">here</a>. You can download them as a ZIP file <a href="./app/EnsMOD_Examples.zip" download>EnsEMOD_Examples.zip</a> 
+Before you run **EnsMOD** on your own data, we provide four different sample datasets (<i>EnsMOD-Examples</i>) for you to practice with. A brief description of these sample datasets can be found <a href="./app/EnsMOD_Examples/EnsMOD_Examples_description.txt" target="_blank">here</a>. You can download them as a ZIP file <a href="https://github.com/niaid/EnsMOD/blob/main/app/EnsMOD_Examples.zip">EnsEMOD_Examples.zip</a> 
 
 **EnsMOD** can be downloaded here by executing the following code in a terminal. But you may need to install <i><a href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git" target="_blank">git</a></i> on you computer if you do not have a it installed already. 
 

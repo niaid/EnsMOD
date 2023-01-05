@@ -11,6 +11,7 @@
 #
 options(scipen = 999)
 library(shiny)
+library(shinyjs)
 library(readr)
 library(dplyr)
 library(data.table)
