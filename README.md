@@ -15,6 +15,9 @@ To run **EnsMOD**, R and Rstudio should be installed and running on your machine
 
 ```code
 library(shiny)
+library(shinyjs)
+library(xfun)
+library(DT)
 library(readr)
 library(dplyr)
 library(data.table)
