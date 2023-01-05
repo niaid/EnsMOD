@@ -12,6 +12,9 @@
 options(scipen = 999)
 library(shiny)
 library(shinyjs)
+library(xfun)
+library(DT)
+library(factoextra)
 library(readr)
 library(dplyr)
 library(data.table)
@@ -306,7 +309,7 @@ server <- function(session, input, output){
     d_p <- as.dist(1 - c_2)
     
     # Update the progress
-    progress$inc(1/5)
+    progress$inc(1/10)
     
     # Linkages: "average" (= UPGMA), "ward.D2", "complete", "single", "centroid" (= UPGMC)
     # Hierarchical clustering using Euclidean distance
@@ -348,7 +351,7 @@ server <- function(session, input, output){
     res.coph_p_ce <- cophenetic(hc_p_ce)
     
     # Update the progress
-    progress$inc(2/5)
+    progress$inc(1/5)
     
     # Correlations between the distance matrix and the Cophenetic Correlations
     # are compared for 'euclidean', 'manhattan', and 'pearson' distances to see which
@@ -393,7 +396,7 @@ server <- function(session, input, output){
     hc.res_a <<- eclust(input_data_nna_t, FUNcluster = "hclust", k = NULL, k.max = MaxPosNumClusters, stand = FALSE, graph = FALSE, hc_metric = CCC_df_ranked_top$distance, hc_method = CCC_df_ranked_top$linkage, nboot=100, seed=78)
     
     # Update the progress
-    progress$inc(3/5)
+    progress$inc(2/5)
     
     
     ## Run Rmarkdown
@@ -418,7 +421,7 @@ server <- function(session, input, output){
     PcaGrid_prob <<- as.numeric(input$PcaGrid_prob)
     
     # Update the progress status
-    progress$inc(4/5)
+    progress$inc(3/5)
   })
   
   
