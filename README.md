@@ -44,7 +44,7 @@ Before you run **EnsMOD** on your own data, we provide four different sample dat
 
 **EnsMOD** can be downloaded as a ZIP file (as shown below) 
 ![GitHub Download](./app/www/images/EnsMOD_GitHub_download.jpeg)
-or by executing the following code in a terminal. But you may need to install <i><a href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git" target="_blank">git</a></i> on you computer if you do not have a it installed already. 
+<br> or by executing the following code in a terminal. But you may need to install <i><a href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git" target="_blank">git</a></i> on you computer if you do not have a it installed already. 
 
 ```code
 git clone git@github.com:niaid/EnsMOD.git
