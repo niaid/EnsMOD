@@ -42,6 +42,7 @@ library(fitdistrplus)
 
 Before you run **EnsMOD** on your own data, we provide four different sample datasets (<i>EnsMOD-Examples</i>) for you to practice with. A brief description of these sample datasets can be found <a href="./app/EnsMOD_Examples/EnsMOD_Examples_description.txt" target="_blank">here</a>. You can download them as a ZIP file <a href="https://github.com/niaid/EnsMOD/blob/main/app/EnsMOD_Examples.zip">EnsEMOD_Examples.zip</a> 
 
+
 **EnsMOD** can be downloaded as a ZIP file here (<i>as shown below</i>) 
 ![GitHub Download](./app/www/images/EnsMOD_GitHub_download.jpeg)
 <br> or by executing the following code in a terminal. But you may need to install <i><a href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git" target="_blank">git</a></i> on you computer if you do not have it installed already. 
@@ -54,7 +55,7 @@ Once downloaded from GitHub, open the <i>app.R</i> file in the <i>EnsMOD/app/</i
 
 ![Figure1](./app/www/images/EnsMOD_Rstudio_ShinyApp.png)
 
-The results from EnsMOD analysis are presented in several tab (<i>see below<i>) and can be found in the output folder (<i>EnsMOD/app/www/EnsMODoutputs/<i>).
+The results from EnsMOD analysis are presented under several tabs (<i>see below</i>) and can be found in the output folder (<i>EnsMOD/app/www/EnsMODoutputs/<i>).
 
 ![Home](./app/www/images/EnsMOD_home.png)
 ![DensityPlot](./app/www/images/EnsMOD_DensityPlot.png)
