@@ -401,7 +401,7 @@ server <- function(session, input, output){
     
     ## Run Rmarkdown
     inFile2 <- input$file1
-    rmarkdown::render("~/EnsMOD/app/Ensemble_Methods_for_Outlier_Detection_v2_0.Rmd", 
+    rmarkdown::render("~/EnsMOD/Ensemble_Methods_for_Outlier_Detection_v2_0.Rmd", 
                       output_format = 'html_document', 
                       output_dir = outputDir, 
                       params=list(
