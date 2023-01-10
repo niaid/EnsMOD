@@ -1,0 +1,567 @@
+---
+title: "Ensemble_Methods_for_Outlier_Detection_Version_2.0"
+author: "Jian Song, Nathan P. Manes"
+date: "5/5/2022"
+
+output:
+  html_document:
+    toc: TRUE
+    toc_depth: 4
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(cluster) # hclust()
+library(limma) # plotDensities()
+library(ggraph)
+library(RColorBrewer)
+library(tidyverse)
+library(factoextra) # eclust(), fviz_silhouette()
+library(stats) # dist(), cor(), as.dist(), cophenetic()
+library(gplots)
+library(fitdistrplus)
+options(max.print=1000000)
+
+```
+
+## 1. Set the Statistical Parameters and Prepare and Visualize the Input Data
+
+The four statistical cutoff values are set below.  Your input file is loaded in here.  The data are filtered by removing any row with "NaN" (missing values).  Density plots are used to visualize the distribution of gene/protein expression values within each sample and across the samples.  The normality of the dataset is visualized and tested.  Note that it is unclear how accurately outliers will be detected if the input dataset is significantly different from a normal distribution.
+
+```{r getData, warning=FALSE, message=FALSE, fig.width=12, fig.height=6}
+
+# Set the Cophenetic Correlation Coefficient (CCC) cutoff (higher is more stringent).
+# The CCC is a measure of how faithfully a dendrogram preserves the pairwise distances 
+# between the original unmodeled data points.
+CCC_min <- 0.8
+
+# Set the Silhouette Coefficient (SC) cutoff (lower is more stringent).
+# The SC is a measure of how similar an object is to its own cluster (cohesion) compared to other clusters (separation).
+SC_max <- 0.25
+
+# Set the Robust PCA algorithm (robpca) cutoff (higher is more stringent).
+# For normally distributed data, this value is the estimated fraction of the samples that are not falsely classified as outliers.
+robpca_prob <- 0.975
+
+# Set the Robust PCA algorithm (PcaGrid) cutoff (higher is more stringent)
+# For normally distributed data, this value is the estimated fraction of the samples that are not falsely classified as outliers.
+PcaGrid_prob <- 0.975
+
+
+# To analyze your table of data, paste it in a new Excel file named "Gene_Expression_Table.xlsx".
+# Rows = genes/proteins.  Columns = samples.  Values = expression values.
+# The first row is for the column headers (sample identifiers).
+# Don't have gene/protein identifiers in the first column; use all columns for abundance values.
+# Place this file in the same directory as this R script.
+# Optional: if present, remove any extra header rows using e.g. "skip=19" - which will remove the 19 header rows
+input_data <- readxl::read_xlsx("./Gene_Expression_Table.xlsx", skip = 0, col_names = TRUE, col_types=NULL)
+input_data <- data.frame(input_data)
+rownames(input_data) <- input_data$Leading.Protein.ID
+input_data$Leading.Protein.ID <- NULL # Remove the gene/protein ID column if present
+input_data <- as.data.frame(sapply(input_data, as.numeric))
+
+# Display the first six rows of the input data
+head(input_data)
+
+# Display the dimension of the input table
+# Number of rows (genes/proteins) and the number of columns (samples)
+dim(input_data)
+
+# Remove any row (genes/proteins) with one or more invalid values ("NaN") 
+input_data_nna <- input_data[complete.cases(input_data), ]
+# Display how many rows remain after removing the rows with NaN's
+input_data_nna_rows <- dim(input_data_nna)[1]
+input_data_col <- dim(input_data_nna)[2]
+dim(input_data_nna)
+
+# Plot the density of expression values for all of the samples on the same plot.
+# If the samples are very diverse, a global normalization might be helpful.
+# Note that this is not a visualization of how close the quantification is to a normal distribution.
+plotDensities(input_data_nna, log = FALSE, main="Densities of the Abundance Values for each Sample", legend = "topright") 
+
+# We cannot label each line in the plot above, but we can plot a subset of
+# the samples to be able to differentiate the lines.
+# For example, to plot the distributions of 'Sample_01', 'Sample_02', and 'Sample_03', use
+# plotDensities(input_data_nna[c('Sample_01', 'Sample_02', 'Sample_03')], log = FALSE, main="Densities of the Abundance Values for Selected Samples", legend = "topright")
+# 
+# The expression values should have a normal distribution.  To check this,
+# the data are scaled by calculating the Modified Z-score (Iglewicz and Hoaglin 1993)
+# within each row across the samples.
+
+input_data_nna_median <- vector("numeric", input_data_nna_rows)
+for (i in 1:input_data_nna_rows) {
+input_data_nna_median[i] <- median(unlist(input_data_nna[i,]))
+}
+
+input_data_nna_MAD <- vector("numeric", input_data_nna_rows)
+for (i in 1:input_data_nna_rows) {
+input_data_nna_MAD[i] <- mad(unlist(input_data_nna[i,]), center = input_data_nna_median[i], constant = 1, na.rm = TRUE, low = FALSE, high = FALSE)
+}
+
+input_data_nna_ModZ <- matrix(nrow = input_data_nna_rows, ncol = input_data_col)
+for (i in 1:input_data_nna_rows) {
+ for (j in 1:input_data_col) {
+   input_data_nna_ModZ[i,j] <- 0.6745 * (input_data_nna[i,j] - input_data_nna_median[i]) / input_data_nna_MAD[i]
+ }
+}
+
+# To use regular Z-scores, enable the line below.
+# This can be used to avoid artifacts from using the Modified Z-score.
+# input_data_nna_ModZ <- t(scale(t(input_data_nna), center = TRUE, scale = TRUE))
+# 
+# Plot the histogram and density of the Modified Z-scores versus a standard normal distribution (mean=0, SD=1)
+
+input_data_nna_density <- density(as.vector(input_data_nna_ModZ), bw = "nrd0", adjust = 1, kernel = "gaussian", weights = NULL, window = kernel, give.Rkern = FALSE, n = 512, cut = 3, na.rm = TRUE)
+
+density_x <- input_data_nna_density$x
+density_y <- input_data_nna_density$y
+
+hist_range <- seq(from = min(as.vector(input_data_nna_ModZ)), to = max(as.vector(input_data_nna_ModZ)), length.out = 101)
+
+hist_range_normal <- dnorm(hist_range, mean = 0, sd = 1, log = FALSE)
+
+hist(as.vector(input_data_nna_ModZ), breaks = seq(from = -99999, to = 99999, by = 0.5), freq = FALSE, include.lowest = FALSE, right = TRUE, density = NULL, angle = 45, col = NULL, border = NULL, main = "Empirical Histogram and Density versus the Standard Normal Distribution", xlim = c(-7, 7), ylim = c(0, 0.1 + max(max(hist_range_normal), max(density_y))), xlab = "Modified Z-Score", ylab = "Density", axes = TRUE, plot = TRUE, labels = FALSE, nclass = NULL, warn.unused = TRUE)
+
+lines(hist_range, hist_range_normal, col = 2, lwd = 2)
+
+lines(input_data_nna_density, col = 1, lwd = 2)
+
+
+# Calculate the coefficient of determination (R-squared) of the dataset to a standard normal distribution (mean=0, SD=1).
+# Note that R-squared can sometimes be misleading (Spiess and Neumeyer 2010).
+density_y_model <- dnorm(density_x, mean = 0, sd = 1, log = FALSE)
+density_y_mean <- mean(density_y)
+R_sq <- 1 - ( sum((density_y - density_y_model)^2) / sum((density_y - density_y_mean)^2) )
+R_sq
+
+# Fit the dataset to a normal distribution
+fit_norm <- fitdist(as.vector(input_data_nna_ModZ), "norm", method = "mle", start=NULL, fix.arg=NULL, discrete = FALSE, keepdata = TRUE)
+
+# Enable to make small versions of the four plots below
+# plot(fit_norm)
+# 
+# Enable to plot the Empirical Density against the Fitted Normal Distribution Function
+# denscomp(fit_norm, probability = TRUE, main = "Empirical Density against the Fitted Normal Distribution Function", addlegend = TRUE, xlegend = "topright", ylegend = NULL, demp = TRUE, dempcol = "black", plotstyle = "graphics", fitnbpts = 101)
+# 
+# Plot the Empirical Cumulative Distribution against the Fitted Normal Distribution Function
+cdfcomp(fit_norm, xlogscale = FALSE, ylogscale = FALSE, main = "Empirical Cumulative Distribution against the Fitted Normal Distribution Function", datapch = 1, addlegend = TRUE, xlegend = "bottomright", ylegend = NULL, horizontals = TRUE, verticals = FALSE, do.points = TRUE, use.ppoints = TRUE, a.ppoints = 0.5, name.points = NULL, lines01 = FALSE, add = FALSE, plotstyle = "graphics", fitnbpts = 101)
+
+# Q-Q Plot of the Theoretical Quantiles against the Empirical Quantiles
+qqcomp(fit_norm, xlogscale = FALSE, ylogscale = FALSE, main = "Q-Q Plot of the Theoretical Quantiles against the Empirical Quantiles", addlegend = FALSE, xlegend = "bottomright", ylegend = NULL, use.ppoints = TRUE, a.ppoints = 0.5, line01 = TRUE, line01col = "black", line01lty = 1, ynoise = TRUE, plotstyle = "graphics")
+
+# P-P Plot of the Theoretical Probabilities against the Empirical Probabilities
+ppcomp(fit_norm, xlogscale = FALSE, ylogscale = FALSE, main = "P-P Plot of the Theoretical Probabilities against the Empirical Probabilities", addlegend = FALSE, xlegend = "bottomright", ylegend = NULL, use.ppoints = TRUE, a.ppoints = 0.5, line01 = TRUE, line01col = "black", line01lty = 1, ynoise = TRUE, plotstyle = "graphics")
+
+# Plot the Cullen and Frey graph (skewness-kurtosis plot)
+descdist(as.vector(input_data_nna_ModZ), discrete = FALSE)
+
+# Perform a Shapiro-Wilk normality test (max input values = 5000)
+SW_input <- as.vector(input_data_nna_ModZ)
+if (length(SW_input) > 5000) {
+SW_input <- sample(SW_input, 5000, replace = FALSE, prob = NULL)
+}
+SW_output <- shapiro.test(SW_input)
+SW_output$p.value
+
+# Perform a Kolmogorov-Smirnov test to compare the dataset to a normal distribution
+KS_output <- ks.test(as.vector(input_data_nna_ModZ), "pnorm", alternative = "two.sided")
+KS_output$p.value
+
+
+```
+<br>
+
+## 2. Hierachical Clustering for the Cophenetic Correlation Coefficient
+
+Hierarchical clustering analyses (HCAs) are performed, and the choice of the distance metric and linkage are determined using the Cophenetic Correlation Coefficient (CCC) (Selicato et al 2021).  Three distance metrics and five linkages are used (15 HCA's total).  None of the three distance metrics are nonparametric so that the clustering is highly quantitative.  The HCA that results in the largest CCC will be used for the downstream analyses.  If this CCC < 0.8 (default value; CCC_min can be altered above), then the dendrogram is not a good representation of the relationships between the objects, and outliers can not be confidently detected (Selicato et al 2021).  If CCC >= 0.8, the clustering was significant, and outliers can be detected if any exist.
+
+```{r preAnalysis, warning=FALSE, message=FALSE, fig.width=12, fig.height=6}
+
+# Transpose the data so the sample will become the rows and genes/proteins will become the columns
+input_data_nna_t <- t(input_data_nna)
+rownames(input_data_nna_t)
+
+# Calculate distances: Euclidean, Manhattan, Pearson correlation coefficient
+d_e <- dist(input_data_nna_t, method = "euclidean")
+d_m <- dist(input_data_nna_t, method = "manhattan")
+c_2 = cor(input_data_nna, method="pearson")
+d_p <- as.dist(1 - c_2)
+
+# Linkages: "average" (= UPGMA), "ward.D2", "complete", "single", "centroid" (= UPGMC)
+# Hierarchical clustering using Euclidean distance
+hc_e_a <- hclust(d_e, method = "average" ) 
+hc_e_w <- hclust(d_e, method = "ward.D2" ) 
+hc_e_co <- hclust(d_e, method = "complete" ) 
+hc_e_s <- hclust(d_e, method = "single" ) 
+hc_e_ce <- hclust(d_e, method = "centroid" ) 
+# Hierarchical clustering using Manhattan distance
+hc_m_a <- hclust(d_m, method = "average" ) 
+hc_m_w <- hclust(d_m, method = "ward.D2" ) 
+hc_m_co <- hclust(d_m, method = "complete" ) 
+hc_m_s <- hclust(d_m, method = "single" ) 
+hc_m_ce <- hclust(d_m, method = "centroid" ) 
+# Hierarchical clustering using Pearson correlation coefficient
+hc_p_a <- hclust(d_p, method = "average" )
+hc_p_w <- hclust(d_p, method = "ward.D2" )
+hc_p_co <- hclust(d_p, method = "complete" )
+hc_p_s <- hclust(d_p, method = "single" )
+hc_p_ce <- hclust(d_p, method = "centroid" )
+
+# The Cophenetic Correlation Coefficient (CCC) is a measure of how faithfully a dendrogram preserves the pairwise distances between the original unmodeled data points.
+res.coph_e_a <- cophenetic(hc_e_a)
+res.coph_e_w <- cophenetic(hc_e_w)
+res.coph_e_co <- cophenetic(hc_e_co)
+res.coph_e_s <- cophenetic(hc_e_s)
+res.coph_e_ce <- cophenetic(hc_e_ce)
+
+res.coph_m_a <- cophenetic(hc_m_a)
+res.coph_m_w <- cophenetic(hc_m_w)
+res.coph_m_co <- cophenetic(hc_m_co)
+res.coph_m_s <- cophenetic(hc_m_s)
+res.coph_m_ce <- cophenetic(hc_m_ce)
+
+res.coph_p_a <- cophenetic(hc_p_a)
+res.coph_p_w <- cophenetic(hc_p_w)
+res.coph_p_co <- cophenetic(hc_p_co)
+res.coph_p_s <- cophenetic(hc_p_s)
+res.coph_p_ce <- cophenetic(hc_p_ce)
+
+# Correlations between the distance matrix and the Cophenetic Correlations
+# are compared for 'euclidean', 'manhattan', and 'pearson' distances to see which
+# one is the best.  The higher the correlation, the better the HCA.
+# Create a dataframe to store the CCC values from each distance and linkage combination
+distance = c("euclidean", "euclidean", "euclidean", "euclidean", "euclidean",
+             'manhattan', 'manhattan', 'manhattan', 'manhattan', 'manhattan', 
+             'pearson', 'pearson', 'pearson', 'pearson', 'pearson')
+linkage = c('average', 'ward.D2', 'complete', 'single', 'centroid',
+            'average', 'ward.D2', 'complete', 'single', 'centroid',
+            'average', 'ward.D2', 'complete', 'single', 'centroid')
+distance_matrix = c('e_a', 'e_w', 'e_co', 'e_s', 'e_ce',
+                    'm_a', 'm_w', 'm_co', 'm_s', 'm_ce',
+                    'p_a', 'p_w', 'p_co', 'p_s', 'p_ce')
+CCC = c(
+  cor(d_e, res.coph_e_a),
+  cor(d_e, res.coph_e_w),
+  cor(d_e, res.coph_e_co),
+  cor(d_e, res.coph_e_s),
+  cor(d_e, res.coph_e_ce),
+
+  cor(d_m, res.coph_m_a),
+  cor(d_m, res.coph_m_w),
+  cor(d_m, res.coph_m_co),
+  cor(d_m, res.coph_m_s),
+  cor(d_m, res.coph_m_ce),
+
+  cor(d_p, res.coph_p_a),
+  cor(d_p, res.coph_p_w),
+  cor(d_p, res.coph_p_co),
+  cor(d_p, res.coph_p_s),
+  cor(d_p, res.coph_p_ce))
+
+CCC_df = data.frame(distance, linkage, distance_matrix, CCC) 
+CCC_df_ranked = CCC_df[order(-CCC_df$CCC),]
+
+# Display the CCC for each HCA
+CCC_df_ranked
+
+# Find the best distance-linkage combination
+CCC_df_ranked_top = CCC_df_ranked[1,]
+
+# Get the hierarchical clustering object generated using the best distance-linkage
+hc = get(paste0('hc_', CCC_df_ranked_top$distance_matrix))
+
+# Display the dendrogram generated using the best distance-linkage
+plot(hc, hang=-1, main='Cluster Dendrogram using the Best Distance and Linkage')
+
+```
+<br>
+
+## 3. Hierachical Clustering for the Silhouette Coefficients
+
+The Silhouette coefficient (SC) is calculated for each sample. A sample with SC < 0.25 (default value; SC_max can be altered above) is a potential outlier because it clustered poorly with the other samples; a sample with SC >= 0.25 is not a potential outlier (Selicato et al 2021).
+
+
+```{r HC, warning=FALSE, message=FALSE, message=FALSE}
+
+# Calculate the maximum possible number of clusters
+# Note that eclust() -> hcut() might crash if this value is > 20
+# Note that eclust() -> hcut() might crash if this value is > (input_data_col - 1)
+MaxPosNumClusters <- min(c(20 , (input_data_col - 1) ))
+MaxPosNumClusters
+
+# eclust() - Visual enhancement of clustering analysis for enhancing the
+# workflow of clustering analyses and ggplot2-based data visualization
+hc.res_a <- eclust(input_data_nna_t, FUNcluster = "hclust", k = NULL, k.max = MaxPosNumClusters, stand = FALSE, graph = FALSE, hc_metric = CCC_df_ranked_top$distance, hc_method = CCC_df_ranked_top$linkage, nboot=100, seed=78)
+
+# Display the estimated optimal number of clusters from eclust() gap statistics
+nbclust_GapStat <- hc.res_a$nbclust
+nbclust_GapStat
+
+# If the estimated optimal number of clusters = 1, then the eclust() gap statistic
+# method failed to identify an optimal number of clusters.
+# Use the silhouette method (max of mean of SC values) (Charrad et al 2014).
+if (nbclust_GapStat == 1) {
+
+# Make a data frame for the mean SC at each possible number of clusters
+numClust_i <- 1:MaxPosNumClusters
+numClust_AvgSC <- rep(0.001, MaxPosNumClusters)
+numClust_df <- data.frame(numClust_i, numClust_AvgSC) 
+
+# Loop through each possible number of clusters and save the mean SC 
+for (i in 2:MaxPosNumClusters) {
+    
+    hc.res_a <- eclust(input_data_nna_t, FUNcluster = "hclust", k = i, stand = FALSE, graph = FALSE, hc_metric = CCC_df_ranked_top$distance, hc_method = CCC_df_ranked_top$linkage, nboot=100, seed=78)
+    
+    # Silhouette information
+    silinfo_a <- hc.res_a$silinfo
+    numClust_df[i, 2] <- silinfo_a$avg.width
+    
+    }
+
+# Sort rows by the mean SC (descending)
+numClust_df_ranked <- numClust_df[order(-numClust_df$numClust_AvgSC),]
+
+# Find the estimated optimal number of clusters
+numClust_df_ranked_top <- numClust_df_ranked[1,]
+
+# Perform an HCA and calculate SC values using the estimated optimal number of clusters
+hc.res_a <- eclust(input_data_nna_t, FUNcluster = "hclust", k = numClust_df_ranked_top[1], stand = FALSE, graph = FALSE, hc_metric = CCC_df_ranked_top$distance, hc_method = CCC_df_ranked_top$linkage, nboot=100, seed=78)
+
+}
+
+# Display the mean SC at each number of clusters (if silhouette method was used)
+if (nbclust_GapStat == 1) {
+  numClust_df_ranked
+}
+
+# Display the final estimated optimal number of clusters
+hc.res_a$nbclust
+
+# Display the dendrogram
+plot(hc.res_a)
+
+# Visualize Silhouette coefficients
+if (input_data_col <= 50) {
+  fviz_silhouette(hc.res_a, label = TRUE)
+} else {
+  fviz_silhouette(hc.res_a, label = FALSE)
+}
+
+# Silhouette information
+silinfo_a <- hc.res_a$silinfo
+
+# The Silhouette coefficient of each sample
+sil_a <- hc.res_a$silinfo$widths[, 1:3]
+sil_a
+
+# The average silhouette coefficient of each cluster
+silinfo_a$clus.avg.widths
+
+# The average silhouette coefficient
+silinfo_a$avg.width
+
+# The size of each cluster
+hc.res_a$size
+
+# Identify the potential outliers
+neg_sil_index_a <- which(sil_a[, 'sil_width'] < SC_max)
+
+# Get the potential outlier sample names
+hcOutliers = rownames(sil_a[neg_sil_index_a, , drop = FALSE])
+hcOutliers
+
+```
+<br>
+
+## 4. Robust PCA
+
+Robust PCA is used to detect outliers (Hubert et al 2005).  The samples are plotted on a diagnostic plot (diagPlot), aka, a Distance-Distance plot (DD-plot; not to be confused with a plot of PC1 vs. PC2).  There are two cutoffs (one horizontal, one vertical) used to classify each sample as an outlier or a non-outlier.  Each cutoff corresponds to a 97.5% probability (default setting) that a sample from a normal distribution would not be falsely classified as an outlier.  The two cutoffs, robpca_prob and PcaGrid_prob, can be altered at the beginning of the script.  If the sample is in the lower-left section of the DD-plot, it is classified as a non-outlier; otherwise, it is classified as an outlier.
+
+
+### 4.1 Robust Sparse PCA algorithm (robpca)
+
+The sparse robust PCA algorithm (robpca) is based on the ROBPCA algorithm (Hubert et al 2005). rospca has been used to detect outliers in transcriptomics datasets (Selicato et al 2021).
+
+```{r PCA, warning=FALSE, message=FALSE, fig.width=9, fig.height=6}
+library(rospca) 
+
+# Perform a PCA (not robust)
+PCA_classic <- prcomp(input_data_nna_t, retx = TRUE, center = TRUE, scale. = TRUE, tol = NULL, rank. = NULL)
+
+# Plot the non-robust PCA results on a PC1-vs-PC2 biplot.  Use text() to include labels.
+if (input_data_col <= 50) {
+  plot(PCA_classic$x, pch=2, col="red", main = "PCA (not robust) BiPlot")
+  text(PCA_classic$x, labels=rownames(PCA_classic$x), cex=0.5, pos=3, col="blue")
+} else {
+  plot(PCA_classic$x, pch=2, col="red", main = "PCA (not robust) BiPlot")
+}
+
+# Display table of the non-robust PCA results
+PCA_classic$x[,c(1,2)]
+
+# Perform Robust PCA (robpca)
+resR0 <- robpca(input_data_nna_t, k = 0, crit.pca.distances = robpca_prob, ndir = 5000, skew = FALSE)
+
+# Plot the robpca results on a PC1-vs-PC2 biplot.  Use text() to include labels.
+if (input_data_col <= 50) {
+  plot(resR0$scores, pch=2, col="red", main = "Robust PCA (robpca) BiPlot")
+  text(resR0$scores, labels=rownames(resR0$scores), cex=0.5, pos=3, col="blue")
+  } else {
+  plot(resR0$scores, pch=2, col="red", main = "Robust PCA (robpca) BiPlot")
+  }
+
+# Display table of the robpca results
+resR0$scores[,c(1,2)]
+
+# Diagnositc plot (DD-plot or outlier map)
+diagPlot(resR0, title = "Robust PCA (robpca)", pch = 17, col="red", labelOut = TRUE, id = 5)
+
+# Display the robpca results (outliers are 'FALSE')
+resR0_flag <- as.data.frame(resR0$flag.all)
+resR0_flag 
+
+
+resR0_flag$sample <- row.names(resR0_flag)
+colnames(resR0_flag) <- c('regular', 'sample')
+resR0_flag$regular <- as.numeric(resR0_flag$regular)
+
+# Display the outlier sample names
+rosOutliers = resR0_flag[resR0_flag$regular == 0,]$sample
+rosOutliers
+```
+<br>
+
+
+### 4.2 Robust PCA based on Projection Pursuit (PP) using GRID (PcaGrid)
+
+PcaGrid computes an approximation of the PP-estimators for a robust PCA using the GRID algorithm to detect outlier samples. It was compared with PcaHubert, and had better sensitivity and specificity for simulated and real transcriptomics data (Chen et al 2020).
+
+```{r PcaGrid, warning=FALSE, message=FALSE, fig.width=8, fig.height=8}
+library(rrcov)
+
+# Perform a Robust PCA (PcaGrid)
+pc <- PcaGrid(input_data_nna_t, crit.pca.distances = PcaGrid_prob)
+
+# Plot the PcaGrid results on a PC1-vs-PC2 biplot.  Use text() to include labels.
+if (input_data_col <= 50) {
+  plot(pc$scores, pch=2, col="red", main = "Robust PCA (PcaGrid) BiPlot")
+  text(pc$scores, labels=rownames(pc$scores), cex=0.5, pos=3, col="blue")
+  } else {
+  plot(pc$scores, pch=2, col="red", main = "Robust PCA (PcaGrid) BiPlot")
+  }
+
+# Display table of the PcaGrid results
+pc$scores[,c(1,2)]
+
+# Diagnositc plot (DD-plot or outlier map)
+diagPlot(pc, title = "Robust PCA (PcaGrid)", pch = 17, col="red", labelOut = TRUE, id = 5)
+
+# Display the results (outliers = FALSE)
+pc_flag <- as.data.frame(pc$flag)
+pc_flag
+
+
+pc_flag$sample <- row.names(pc_flag)
+colnames(pc_flag) <- c('regular', 'sample')
+pc_flag$regular <- as.numeric(pc_flag$regular)
+
+# Display the outlier sample names
+pcOutliers = pc_flag[pc_flag$regular == 0,]$sample
+pcOutliers
+```
+<br>
+
+## 5. Summary of the Results and Identification of Outlier(s)
+
+In this analysis, three different methods were used to examine the samples. They complement each other in the identification potential outlier(s). First, the density plot (made using "plotDensities") was used to visualize how similar the expression patterns were across the samples. Second, hierarchical clustering was used to examine how close the samples are to each other; closely related samples formed a tight cluster. The Cophenetic Correlation Coefficient (CCC) was used to evaluate if the dendrogram is a good representation of the similarity among the samples. The Silhouette coefficient (SC) was used to examine how strongly each sample belonged to its cluster. Finally, robust PCA analyses were performed using two different algorithms, robpca and PcaGrid. These were used to identify outlier(s) that surpassed a probability threshold. The PcaGrid test was described by Chen et al 2020, and the CCC, SC, and robpca tests were described by Selicato et al 2021.
+
+The robust PCA analyses use statistical testing to robustly identify the outlier(s). The density plot and hierarchical clustering provide additional visual and descriptive information.  Ideally, they will confirm the rPCA results by showing that the outlier(s) are distant from the other samples.
+
+### 5.1 Outlier(s) Identified by Robust PCA analyses
+
+```{r IDoutliers, warning=FALSE, message=FALSE}
+
+# A robpca cutoff of 0.975 is recommended (Selicato et al 2021).
+# At the start of the script, the robpca cutoff was set to:
+robpca_prob
+# The samples that are outside this cutoff are potential outliers, and the other samples are not.
+# The samples that are outside this cutoff:
+rosOutliers
+
+
+# A PcaGrid cutoff of 0.975 is recommended (Chen et al 2020).
+# At the start of the script, the PcaGrid cutoff was set to:
+PcaGrid_prob
+# The samples that are outside this cutoff are potential outliers, and the other samples are not.
+# The samples that are outside this cutoff:
+pcOutliers
+
+
+# The samples that satisfied both robust PCA (robpca and PcaGrid) criteria for an outlier:
+intersect(pcOutliers, rosOutliers)
+
+
+```
+<br>
+
+### 5.2 Outlier(s) Identified by Hiearchical Clustering
+
+
+```{r IDbyClustering, warning=FALSE, message=FALSE}
+
+# A CCC cutoff of 0.8 is recommended (Selicato et al 2021).
+# At the start of the script, the CCC cutoff was set to:
+CCC_min
+# The CCC was calculated:
+CCC_df_ranked_top$CCC
+# Did the input data pass the CCC test? (TRUE = yes, FALSE = no)
+# If TRUE, then the HCA clustering was informative, and subsequent outlier detection can be informative.
+# If FALSE, then the HCA clustering wasn't informative, and subsequent outlier detection won't be informative.
+CCC_df_ranked_top$CCC >= CCC_min
+
+
+# An SC cutoff of 0.25 is recommended (Selicato et al 2021).
+# At the start of the script, the SC cutoff was set to:
+SC_max
+# The samples that have an SC value lower than the SC cutoff
+# are potential outliers, and the other samples are not.
+# The samples that have an SC value lower than the SC cutoff:
+hcOutliers
+
+# The samples that satisfied the CCC, SC, and robpca criteria for an outlier:
+if (CCC_df_ranked_top$CCC >= CCC_min) {
+  intersect(hcOutliers, rosOutliers)
+}
+```
+<br>
+
+### 5.3 Outlier(s) Identified by Both HCA and Robust PCA
+
+```{r combined, warning=FALSE, message=FALSE}
+
+# The samples that satisfied all four criteria (CCC, SC, robpca, PcaGrid) for an outlier:
+if (CCC_df_ranked_top$CCC >= CCC_min) {
+  intersect(intersect(hcOutliers, rosOutliers), pcOutliers)
+}
+```
+<br>
+
+## 6. References
+
+<ul>
+
+Boris Iglewicz and David Hoaglin 1993 "Volume 16: How to Detect and Handle Outliers", The ASQC Basic References in Quality Control: Statistical Techniques, Edward F. Mykytka, Ph.D., Editor.
+
+Charrad et al 2014 NbClust: An R Package for Determining the Relevant Number of Clusters in a Data Set. J Statistical Software 61:1-36.
+
+Chen et al 2020 Robust principal component analysis for accurate outlier sample detection in RNA-Seq data. BMC Bioinformatics. 21:269.
+
+Hubert et al 2005 ROBPCA: a new approach to robust prinicipal component analysis. Technometrics 47(1):64-79.
+
+Selicato et al 2021 A New Ensemble Method for Detecting Anomalies in Gene Expression Matrices. Mathematics 9:882.
+
+Spiess and Neumeyer 2010 An evaluation of R2 as an inadequate measure for nonlinear models in pharmacological and biochemical research: a Monte Carlo approach. BMC Pharmacol 10:6.
+
+</ul>
+
+
