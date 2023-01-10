@@ -31,7 +31,7 @@ EnsMOD input = "Proteins-processed.csv" (this file is described in the article)
 
 
 Simulated Proteomics Data:
-The data were made using "Simulated Proteomics Dataset.xlsx".
+The data were made using Microsoft Excel.
 
 
 
