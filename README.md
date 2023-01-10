@@ -13,6 +13,7 @@ Here we describe our R script and R Shiny application for <b>Ens</b>emble <b>M</
 
 To run **EnsMOD**, R and Rstudio should be installed and running on your machine. Instructions are available for R installation and for RStudio installation. In addition, the following R packages are also required for **EnsMOD** to work on your machine. 
 
+
 ```code
 library(shiny)
 library(shinyjs)
@@ -27,14 +28,18 @@ library(readxl)
 library(stats)
 library(rrcov)
 library(cluster) 
-library(limma)
+library(rospca)
 library(ggraph)
 library(RColorBrewer)
 library(tidyverse)
 library(factoextra)
 library(gplots)
 library(fitdistrplus)
+library(BiocManager)
 ```
+
+Use the Console to run “BiocManager::install("limma")” to install the limma package.
+
 
 ## Getting Started
 
