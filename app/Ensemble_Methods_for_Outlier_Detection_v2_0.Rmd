@@ -89,7 +89,7 @@ dim(input_data_nna)
 plotDensities(input_data_nna, main="Densities of the Abundance Values for each Sample", legend = "topright") 
 
 # Also save a copy as PDF 
-pdf(file="./app/www/EnsMODoutputs/Density_plot.pdf")
+pdf(file="./www/EnsMODoutputs/Density_plot.pdf")
 plotDensities(input_data_nna, main="Densities of the Abundance Values for each Sample", legend = "topright") 
 dev.off()
 
@@ -355,7 +355,7 @@ hc.res_a$nbclust
 plot(hc.res_a)
 
 # Also save a copy as PDF
-pdf(file="./app/www/EnsMODoutputs/Hierachical_clustering.pdf")
+pdf(file="./www/EnsMODoutputs/Hierachical_clustering.pdf")
 plot(hc.res_a)
 dev.off()
 
@@ -436,7 +436,7 @@ resR0$scores[,c(1,2)]
 diagPlot(resR0, title = "Robust PCA (robpca)", pch = 17, col="red", labelOut = TRUE, id = 5)
 
 # Also save it as a pdf file
-pdf(file="./app/www/EnsMODoutputs/Robust_Sparse_PCA.pdf")
+pdf(file="./www/EnsMODoutputs/Robust_Sparse_PCA.pdf")
 diagPlot(resR0, title = "Robust PCA (robpca)", pch = 17, col="red", labelOut = TRUE, id = 5)
 dev.off()
 
@@ -481,7 +481,7 @@ pc$scores[,c(1,2)]
 diagPlot(pc, title = "Robust PCA (PcaGrid)", pch = 17, col="red", labelOut = TRUE, id = 5)
 
 # Also save it as a pdf file
-pdf(file="./app/www/EnsMODoutputs/PcaGrid.pdf")
+pdf(file="./www/EnsMODoutputs/PcaGrid.pdf")
 diagPlot(pc, title = "Robust PCA (PcaGrid)", pch = 17, col="red", labelOut = TRUE, id = 5)
 dev.off()
 
@@ -530,7 +530,7 @@ pcOutliers
 intersect(pcOutliers, rosOutliers)
 
 # Save the outlier to a file
-write.csv(intersect(pcOutliers, rosOutliers), file="./app/www/EnsMODoutputs/Outliers_identified_by_both_RobustPCAs.csv")
+write.csv(intersect(pcOutliers, rosOutliers), file="./www/EnsMODoutputs/Outliers_identified_by_both_RobustPCAs.csv")
 ```
 <br>
 
