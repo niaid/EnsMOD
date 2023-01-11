@@ -401,7 +401,7 @@ server <- function(session, input, output){
     
     ## Run Rmarkdown
     inFile2 <- input$file1
-    rmarkdown::render("~/EnsMOD/Ensemble_Methods_for_Outlier_Detection_v2_0_stand_alone_script.Rmd", 
+    rmarkdown::render("~/EnsMOD/Ensemble_Methods_for_Outlier_Detection_v2_0.Rmd", 
                       output_format = 'html_document', 
                       output_dir = outputDir, 
                       params=list(
@@ -413,7 +413,7 @@ server <- function(session, input, output){
     )
     #  Display the HTML file generated from Rmarkdown
     getPage<-function() {
-      return(includeHTML("~/EnsMOD/app/www/EnsMODoutputs/Ensemble_Methods_for_Outlier_Detection_v2_0_stand_alone_script.html"))
+      return(includeHTML("~/EnsMOD/app/www/EnsMODoutputs/Ensemble_Methods_for_Outlier_Detection_v2_0.html"))
     }
     output$rmarkdown<-renderUI({getPage()})          
     
