@@ -43,9 +43,9 @@ Use the Console to run “BiocManager::install("limma")” to install the limma 
 
 ## Getting Started
 
-**EnsMOD** can be run as a script using "Ensemble_Methods_for_Outlier_Detection_v2_0_stand_alone_script.Rmd".
+**EnsMOD** can be run as a script using <i>Ensemble_Methods_for_Outlier_Detection_v2_0_stand_alone_script.Rmd</i>.
 
-**EnsMOD** can be run as a Shiny App from RStudio. It will also explicitly link your data with the R codes and results as a Rmarkdown html file, which can be used as a report or for presentation and sharing to facilitate your collaboration. All of the results are saved in the <i>EnsMODoutputs</i> folder (<i>~/EnsMOD/app/www/EnsMODoutpupts/</i>).  
+**EnsMOD** can also be run as a Shiny App from RStudio. It will also explicitly link your data with the R codes and results as a Rmarkdown html file, which can be used as a report or for presentation and sharing to facilitate your collaboration. All of the results are saved in the <i>EnsMODoutputs</i> folder (<i>~/EnsMOD/app/www/EnsMODoutpupts/</i>).  
 
 Before you run **EnsMOD** on your own data, we provide four different sample datasets (<i>EnsMOD-Examples</i>) for you to practice with. A brief description of these sample datasets can be found <a href="./app/EnsMOD_Examples/EnsMOD_Examples_description.txt" target="_blank">here</a>. You can access the examples <a href="./app/EnsMOD_Examples/" target="_blank">here</a>. 
 
