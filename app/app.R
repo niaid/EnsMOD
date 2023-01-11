@@ -15,9 +15,9 @@ options(scipen = 999)
 # Check to see required R packages installed
 # if not, install them
 
-list.of.packages <- c("ggplot2", "Rcpp"", "shiny", "shinyjs", "xfun", "DT", "factoextra", "readr", "dplyr", "data.table", "reshape2", "htmltools", "readxl", "stats", "rrcov", "cluster", "limma", "ggraph", "RColorBrewer", "tidyverse", "factoextra", "stats", "gplots", "fitdistrplus")
+list.of.packages <- c("shiny", "shinyjs", "xfun", "DT", "factoextra", "readr", "dplyr", "data.table", "reshape2", "htmltools", "readxl", "stats", "rrcov", "cluster", "limma", "ggraph", "RColorBrewer", "tidyverse", "factoextra", "stats", "gplots", "fitdistrplus")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-if(length(new.packages)) install.packages(new.packages",
+if(length(new.packages)) install.packages(new.packages)
 
 # Load required R packages
 library(shiny)
