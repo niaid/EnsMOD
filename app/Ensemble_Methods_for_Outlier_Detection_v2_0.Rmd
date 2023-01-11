@@ -559,7 +559,7 @@ SC_max
 hcOutliers
 
 # Save the outliers to a file
-write.csv(intersect(hcOutliers, rosOutliers), file="./app/www/EnsMODoutputs/Outliers_identified_by_HierarchicalClustering.csv")
+write.csv(intersect(hcOutliers, rosOutliers), file="./www/EnsMODoutputs/Outliers_identified_by_HierarchicalClustering.csv")
 
 # The samples that satisfied the CCC, SC, and robpca criteria for an outlier:
 if (CCC_df_ranked_top$CCC >= CCC_min) {
@@ -578,7 +578,7 @@ if (CCC_df_ranked_top$CCC >= CCC_min) {
 }
 
 # Save the outlier to a file
-write.csv(intersect(intersect(hcOutliers, rosOutliers), pcOutliers), file="./app/www/EnsMODoutputs/Outliers_identified_by_EnsembleMethods.csv")
+write.csv(intersect(intersect(hcOutliers, rosOutliers), pcOutliers), file="./www/EnsMODoutputs/Outliers_identified_by_EnsembleMethods.csv")
 ```
 <br>
 
