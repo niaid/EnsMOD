@@ -11,6 +11,16 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+# Check and install 'limma' package if needed
+if (!require("limma"))
+  BiocManager::install("limma")
+
+# Check and install other packages if needed
+list.of.packages <- c("shiny", "shinyjs", "xfun", "DT", "factoextra", "readr", "dplyr", "data.table", "reshape2", "htmltools", "readxl", "stats", "rrcov", "cluster", "ggraph", "RColorBrewer", "tidyverse", "gplots", "fitdistrplus")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+
 library(cluster) # hclust()
 library(limma) # plotDensities()
 library(ggraph)
