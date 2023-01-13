@@ -12,7 +12,6 @@
 options(scipen = 999)
 
 ## Check to see if required R packages installed
-## if not, install them
 
 # Check and install 'limma' package if needed
 if (!require("limma"))
