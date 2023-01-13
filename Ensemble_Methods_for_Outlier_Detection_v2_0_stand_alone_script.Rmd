@@ -12,6 +12,7 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
+# Install all required R packages if needed
 # Check and install 'limma' package if needed
 if (!require("limma"))
   BiocManager::install("limma")
