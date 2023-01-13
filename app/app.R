@@ -12,7 +12,6 @@
 options(scipen = 999)
 
 ## Check to see if required R packages installed
-
 # Check and install 'limma' package if needed
 if (!require("limma"))
   BiocManager::install("limma")
