@@ -183,7 +183,7 @@ ui <- fluidPage(
                   ),
                   tabPanel(title = "User Guide", value = "userGuide",
                            htmlOutput("spacer8"),
-                           uiOutput("userguide")
+                           tags$iframe(style="height:1100px; width:100%; scrolling=yes", src = "./EnsMOD_User_Guide_v1.pdf")
                   )
       ),
       width = 9
@@ -612,16 +612,6 @@ server <- function(session, input, output){
     output$contactUS <- renderText({
       "Your email was sent!"
     })
-  })
-  
-  ## User documentation
-  output$userguide <- renderUI({
-    # tags$iframe(
-    #   seamless="seamless",
-    #   src="./www/EnsMOD_userguide_V2.pdf",
-    #   style="height:700px;width:80010%"
-    # )
-    HTML("<br><br><h2>To be added...")
   })
   
   # Set this to "force" instead of TRUE for testing locally (without Shiny Server)
