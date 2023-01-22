@@ -81,9 +81,11 @@ head(input_data)
 # Number of rows (genes/proteins) and the number of columns (samples)
 dim(input_data)
 
+# Remove rows (genes/proteins) having all zeros
+input_data_0 <- input_data[!apply(input_data, 1, function(x) all(x == 0)), ]
 # Remove any row (genes/proteins) with one or more invalid values ("NaN") 
-input_data_nna <- input_data[complete.cases(input_data), ]
-# Display how many rows remain after removing the rows with NaN's
+input_data_nna <- input_data_0[complete.cases(input_data_0), ]
+# Display how many rows remain
 input_data_nna_rows <- dim(input_data_nna)[1]
 input_data_col <- dim(input_data_nna)[2]
 dim(input_data_nna)
@@ -112,19 +114,19 @@ for (i in 1:input_data_nna_rows) {
 input_data_nna_MAD[i] <- mad(unlist(input_data_nna[i,]), center = input_data_nna_median[i], constant = 1, na.rm = TRUE, low = FALSE, high = FALSE)
 }
 
-input_data_nna_ModZ0 <- matrix(nrow = input_data_nna_rows, ncol = input_data_col)
+input_data_nna_ModZ_0 <- matrix(nrow = input_data_nna_rows, ncol = input_data_col)
 for (i in 1:input_data_nna_rows) {
  for (j in 1:input_data_col) {
-   input_data_nna_ModZ0[i,j] <- 0.6745 * (input_data_nna[i,j] - input_data_nna_median[i]) / input_data_nna_MAD[i]
+   input_data_nna_ModZ_0[i,j] <- 0.6745 * (input_data_nna[i,j] - input_data_nna_median[i]) / input_data_nna_MAD[i]
  }
 }
-# Remove any row (genes/proteins) with one or more invalid values
-input_data_nna_ModZ <- input_data_nna_ModZ0[complete.cases(input_data_nna_ModZ0), ]
 
-# To use regular Z-scores, enable the line below.
-# This can be used to avoid artifacts from using the Modified Z-score.
-# input_data_nna_ModZ <- t(scale(t(input_data_nna), center = TRUE, scale = TRUE))
-# 
+# To use regular Z-scores, enable the line below. This can be used to avoid artifacts from using the Modified Z-score.
+# input_data_nna_ModZ_0 <- t(scale(t(input_data_nna), center = TRUE, scale = TRUE))
+
+# Remove any row (genes/proteins) with one or more invalid values
+input_data_nna_ModZ <- input_data_nna_ModZ_0[complete.cases(input_data_nna_ModZ_0), ]
+
 # Plot the histogram and density of the Modified Z-scores versus a standard normal distribution (mean=0, SD=1)
 
 input_data_nna_density <- density(as.vector(input_data_nna_ModZ), bw = "nrd0", adjust = 1, kernel = "gaussian", weights = NULL, window = kernel, give.Rkern = FALSE, n = 512, cut = 3, na.rm = TRUE)
