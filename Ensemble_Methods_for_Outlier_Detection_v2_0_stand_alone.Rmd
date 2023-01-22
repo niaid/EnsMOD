@@ -112,12 +112,14 @@ for (i in 1:input_data_nna_rows) {
 input_data_nna_MAD[i] <- mad(unlist(input_data_nna[i,]), center = input_data_nna_median[i], constant = 1, na.rm = TRUE, low = FALSE, high = FALSE)
 }
 
-input_data_nna_ModZ <- matrix(nrow = input_data_nna_rows, ncol = input_data_col)
+input_data_nna_ModZ0 <- matrix(nrow = input_data_nna_rows, ncol = input_data_col)
 for (i in 1:input_data_nna_rows) {
  for (j in 1:input_data_col) {
-   input_data_nna_ModZ[i,j] <- 0.6745 * (input_data_nna[i,j] - input_data_nna_median[i]) / input_data_nna_MAD[i]
+   input_data_nna_ModZ0[i,j] <- 0.6745 * (input_data_nna[i,j] - input_data_nna_median[i]) / input_data_nna_MAD[i]
  }
 }
+# Remove any row (genes/proteins) with one or more invalid values
+input_data_nna_ModZ <- input_data_nna_ModZ0[complete.cases(input_data_nna_ModZ0), ]
 
 # To use regular Z-scores, enable the line below.
 # This can be used to avoid artifacts from using the Modified Z-score.
