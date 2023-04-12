@@ -20,7 +20,7 @@ if (!require("limma"))
   BiocManager::install("limma")
 
 # Check and install other packages if needed
-list.of.packages <- c("Rcpp", "tidyverse", "shiny", "shinyjs", "xfun", "DT", "factoextra", "readr", "dplyr", "data.table", "reshape2", "htmltools", "readxl", "stats", "rrcov", "cluster", "ggraph", "RColorBrewer", "tidyverse", "gplots", "fitdistrplus")
+list.of.packages <- c("igraph", "rlang", "Rcpp", "tidyverse", "shiny", "shinyjs", "xfun", "DT", "factoextra", "readr", "dplyr", "data.table", "reshape2", "htmltools", "readxl", "stats", "rrcov", "cluster", "ggraph", "RColorBrewer", "tidyverse", "gplots", "fitdistrplus")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 
