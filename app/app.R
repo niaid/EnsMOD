@@ -85,7 +85,7 @@ ui <- fluidPage(
                   selected = 0.25
       ),
       selectInput(inputId = "robpca_prob",
-                  label = "Robust Sparse PCA algorithm (robpca) cutoff:",
+                  label = "ROBust PCA algorithm (robpca) cutoff:",
                   choices = c(0.9, 0.925, 0.95, 0.96, 0.97, 0.975, 0.98, 0.99, 0.995, 0.999, 0.9999, 0.99999, 0.999999),
                   selected = 0.975
       ),
