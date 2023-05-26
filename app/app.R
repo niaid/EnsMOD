@@ -562,7 +562,7 @@ server <- function(session, input, output){
   # message("Download content completed")
   
   
-  # Contact us by sending email to ensmod-team@nih.gov
+  # Contact us by sending email to ensmod-team@list.nih.gov
   # Send email using mailR package
   # in order for this to work, set the java path for R on commandline in a terminal
   # $sudo ln -f -s $(/usr/libexec/java_home)/jre/lib/server/libjvm.dylib /usr/local/lib
@@ -589,7 +589,7 @@ server <- function(session, input, output){
     isolate({
       # Send the email to EnsMOD team
       send.mail(from = input$from,
-                to <- c("ensmod-team@nih.gov"),
+                to <- c("ensmod-team@list.nih.gov"),
                 subject = input$subject,
                 body = paste(paste0("This email is from: ", input$userName, " [", input$from, "]"), input$message, sep="<br/>"),
                 smtp = list(host.name = "smtp.gmail.com", port = 465, user.name = "ensmod.lisb@gmail.com", passwd = "LISB@NIH", ssl = TRUE),
