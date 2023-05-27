@@ -90,6 +90,6 @@ The results from EnsMOD analysis are presented under several tabs (<i>see below<
 **Jian Song &**
 **Aleksandra Nita-Lazar**
 
-Contact us at <a href="mailto:EnMOD-team@nih.gov">EnsMOD-team@nih.gov</a>  
+Contact us at <a href="mailto:EnsMOD-team@list.nih.gov">EnsMOD-team@list.nih.gov</a>  
 
 
