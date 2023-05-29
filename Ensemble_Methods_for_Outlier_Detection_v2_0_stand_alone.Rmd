@@ -418,7 +418,7 @@ if (input_data_col <= 50) {
 }
 
 # Display table of the non-robust PCA results
-PCA_classic$x[,c(1,2)]
+# PCA_classic$x
 
 # Perform Robust PCA (robpca)
 resR0 <- robpca(input_data_nna_t, k = 0, crit.pca.distances = robpca_prob, ndir = 5000, skew = FALSE)
@@ -432,7 +432,7 @@ if (input_data_col <= 50) {
   }
 
 # Display table of the robpca results
-resR0$scores
+# resR0$scores
 
 # Diagnositc plot (DD-plot or outlier map)
 diagPlot(resR0, title = "Robust PCA (robpca)", pch = 17, col="red", labelOut = TRUE, id = 5)
@@ -472,7 +472,7 @@ if (input_data_col <= 50) {
   }
 
 # Display table of the PcaGrid results
-pc$scores
+# pc$scores
 
 # Diagnositc plot (DD-plot or outlier map)
 diagPlot(pc, title = "Robust PCA (PcaGrid)", pch = 17, col="red", labelOut = TRUE, id = 5)
