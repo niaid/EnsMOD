@@ -417,8 +417,9 @@ if (input_data_col <= 50) {
   plot(PCA_classic$x, pch=2, col="red", main = "PCA (not robust) BiPlot")
 }
 
-# Display table of the non-robust PCA results
+# Display table of the non-robust PCA results (all PCs or just PC1 vs. PC2)
 # PCA_classic$x
+# PCA_classic$x[,c(1,2)]
 
 # Perform Robust PCA (robpca)
 resR0 <- robpca(input_data_nna_t, k = 0, crit.pca.distances = robpca_prob, ndir = 5000, skew = FALSE)
@@ -431,8 +432,9 @@ if (input_data_col <= 50) {
   plot(resR0$scores, pch=2, col="red", main = "Robust PCA (robpca) BiPlot")
   }
 
-# Display table of the robpca results
+# Display table of the robpca results (all PCs or just PC1 vs. PC2)
 # resR0$scores
+# resR0$scores[,c(1,2)]
 
 # Diagnositc plot (DD-plot or outlier map)
 diagPlot(resR0, title = "Robust PCA (robpca)", pch = 17, col="red", labelOut = TRUE, id = 5)
@@ -471,8 +473,9 @@ if (input_data_col <= 50) {
   plot(pc$scores, pch=2, col="red", main = "Robust PCA (PcaGrid) BiPlot")
   }
 
-# Display table of the PcaGrid results
+# Display table of the PcaGrid results (all PCs or just PC1 vs. PC2)
 # pc$scores
+# pc$scores[,c(1,2)]
 
 # Diagnositc plot (DD-plot or outlier map)
 diagPlot(pc, title = "Robust PCA (PcaGrid)", pch = 17, col="red", labelOut = TRUE, id = 5)
