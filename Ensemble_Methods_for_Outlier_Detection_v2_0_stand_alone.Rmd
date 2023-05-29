@@ -1,7 +1,7 @@
 ---
 title: "Ensemble_Methods_for_Outlier_Detection_Version_2.0"
 author: "Jian Song, Nathan P. Manes"
-date: "5/5/2022"
+date: "5/28/2023"
 
 output:
   html_document:
@@ -432,7 +432,7 @@ if (input_data_col <= 50) {
   }
 
 # Display table of the robpca results
-resR0$scores[,c(1,2)]
+resR0$scores
 
 # Diagnositc plot (DD-plot or outlier map)
 diagPlot(resR0, title = "Robust PCA (robpca)", pch = 17, col="red", labelOut = TRUE, id = 5)
@@ -472,7 +472,7 @@ if (input_data_col <= 50) {
   }
 
 # Display table of the PcaGrid results
-pc$scores[,c(1,2)]
+pc$scores
 
 # Diagnositc plot (DD-plot or outlier map)
 diagPlot(pc, title = "Robust PCA (PcaGrid)", pch = 17, col="red", labelOut = TRUE, id = 5)
