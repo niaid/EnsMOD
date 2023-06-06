@@ -14,6 +14,8 @@ Manes et al 2023 J Comput Biol, in press
 https://pubmed.ncbi.nlm.nih.gov/37042708/  
 https://doi.org/10.1089/cmb.2022.0243
 
+After detecting outlier(s), EnsMOD Monte Carlo can be used to estimate the probability that they were false identifications.  
+
 
 ## Prerequisites
 
