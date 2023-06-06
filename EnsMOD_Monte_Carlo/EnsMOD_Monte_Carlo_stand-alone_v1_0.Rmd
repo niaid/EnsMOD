@@ -1,0 +1,447 @@
+---
+title: "EnsMOD_Monte_Carlo_v1_0"
+author: "Jian Song, Nathan P. Manes"
+date: "06/04/2023"
+
+output:
+  html_document:
+    toc: TRUE
+    toc_depth: 4
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Install all required R packages if needed
+# Check and install 'limma' package if needed
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+if (!require("limma"))
+  BiocManager::install("limma")
+
+# Check and install other packages if needed
+list.of.packages <- c("shiny", "shinyjs", "xfun", "DT", "factoextra", "readr", "dplyr", "data.table", "reshape2", "htmltools", "readxl", "stats", "rrcov", "cluster", "ggraph", "RColorBrewer", "tidyverse", "gplots", "fitdistrplus", "remotes")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+
+# Install rospca
+remotes::install_github("TReynkens/rospca")
+
+library(cluster) # hclust()
+library(limma) # plotDensities()
+library(ggraph)
+library(RColorBrewer)
+library(tidyverse)
+library(factoextra) # eclust(), fviz_silhouette()
+library(stats) # dist(), cor(), as.dist(), cophenetic()
+library(gplots)
+library(fitdistrplus)
+options(max.print=1000000)
+
+```
+
+## 1. Set the Statistical Parameters and Prepare the Input Data
+
+The number of Monte Carlo tests and the four statistical cutoff values are set below.  The input file is loaded.  The data are filtered by removing any row with "NaN" (missing values).  Rows that are all zeros are deleted.  
+
+
+```{r getData, warning=FALSE, message=FALSE, fig.width=12, fig.height=6}
+
+# Set the number of Monte Carlo tests
+# Note that ~1000 or more might take many hours or even many days
+num_MC_Tests <- 500
+
+# Set the initial seed for reproducible Monte Carlo shuffling
+MC_seed <- 90421
+
+# Set the Cophenetic Correlation Coefficient (CCC) cutoff (higher is more stringent).
+# The CCC is a measure of how faithfully a dendrogram preserves the pairwise distances 
+# between the original unmodeled data points.
+CCC_min <- 0.8
+
+# Set the Silhouette Coefficient (SC) cutoff (lower is more stringent).
+# The SC is a measure of how similar an object is to its own cluster (cohesion) compared to other clusters (separation).
+SC_max <- 0.25
+
+# Set the Robust PCA algorithm (robpca) cutoff (higher is more stringent).
+# For normally distributed data, this value is the estimated fraction of the samples that are not falsely classified as outliers.
+robpca_prob <- 0.975
+
+# Set the Robust PCA algorithm (PcaGrid) cutoff (higher is more stringent)
+# For normally distributed data, this value is the estimated fraction of the samples that are not falsely classified as outliers.
+PcaGrid_prob <- 0.975
+
+
+# To analyze your table of data, paste it in a new Excel file named "Gene_Expression_Table.xlsx".
+# Rows = genes/proteins.  Columns = samples.  Values = expression values.
+# The first row is for the column headers (sample identifiers).
+# Don't have gene/protein identifiers in the first column; use all columns for abundance values.
+# Place this file in the same directory as this R script.
+# Optional: if present, remove any extra header rows using e.g. "skip=19" - which will remove the 19 header rows
+input_data <- readxl::read_xlsx("./Gene_Expression_Table.xlsx", skip = 0, col_names = TRUE, col_types=NULL)
+input_data <- data.frame(input_data)
+rownames(input_data) <- input_data$Leading.Protein.ID
+input_data$Leading.Protein.ID <- NULL # Remove the gene/protein ID column if present
+input_data <- as.data.frame(sapply(input_data, as.numeric))
+
+# Display the first six rows of the input data
+head(input_data)
+
+# Display the dimension of the input table
+# Number of rows (genes/proteins) and the number of columns (samples)
+dim(input_data)
+
+# Remove rows (genes/proteins) having all zeros
+input_data_0 <- input_data[!apply(input_data, 1, function(x) all(x == 0)), ]
+# Remove any row (genes/proteins) with one or more invalid values ("NaN") 
+input_data_nna <- input_data_0[complete.cases(input_data_0), ]
+# Display how many rows remain
+input_data_nna_rows <- dim(input_data_nna)[1]
+input_data_col <- dim(input_data_nna)[2]
+dim(input_data_nna)
+
+
+```
+<br>
+
+## 2. Monte Carlo method applied to EnsMOD
+
+Use the Monte Carlo method to estimate the outlier detection false positive rate (FPR) (i.e., the probability of falsely identifying an outlier).  One at a time for each analyte (e.g., gene), some or all of the input data are shuffled.  By default, all columns are included during shuffling.  To prevent a column from being shuffled, append "_fixed" to the end of the sample unique identifier.  The HCA and rPCA tests are performed, and false positive outliers are detected, if any.  This is repeated, and the estimated FPR is the number of detected outliers divided by the number of tests.  
+
+Monte Carlo method reference: William L. Dunn and J. Kenneth Shultis, Exploring Monte Carlo Methods 2nd Ed., Elsevier Publishing, 2022
+
+
+```{r preAnalysis, include=FALSE, warning=FALSE, message=FALSE, fig.width=12, fig.height=6}
+
+# Set the sample unique identifier extension that prevents Monte Carlo shuffling
+extension_fixed <- "_fixed"
+
+# Keep a copy of input data that is never shuffled
+input_data_nna_ORIG <- input_data_nna
+
+
+# Make a vector to represent the fixed columns (never Monte Carlo shuffled)
+# 0 indicates shuffled
+# 1 indicates fixed
+MC_col_fixed <- numeric(input_data_col)
+len_extension_fixed <- nchar(extension_fixed)
+for (col_j in 1:input_data_col) {
+  col_name_j <- colnames(input_data_nna)[col_j]
+  len_col_name_j <- nchar(col_name_j)
+  if (len_col_name_j >= len_extension_fixed) {
+  if (substr(col_name_j, (1 + len_col_name_j) - len_extension_fixed, len_col_name_j) == extension_fixed) {
+    MC_col_fixed[col_j] <- 1
+  }
+  }
+}
+num_col_fixed <- sum(MC_col_fixed)
+num_col_shuffled <- input_data_col - num_col_fixed
+
+
+
+
+
+
+#         Initialize outlier counter and begin Monte Carlo test FOR loop
+num_MC_Outliers <- 0
+for (i_MC_Tests in 1:num_MC_Tests) {
+
+# Restore the input data array using the copy that was never shuffled
+input_data_nna <- input_data_nna_ORIG
+
+
+# Going one row (e.g., gene) at a time (in order)
+# Make a vector of the data to be shuffled
+# Shuffle the data
+# Put the shuffled data back into the data array
+for (row_i in 1:input_data_nna_rows) {
+  k_shuffle_vec <- 0
+  shuffle_vec <- numeric(num_col_shuffled)
+  for (col_j in 1:input_data_col) {
+    if (MC_col_fixed[col_j] == 0) {
+      k_shuffle_vec <- k_shuffle_vec + 1
+      shuffle_vec[k_shuffle_vec] <- input_data_nna[row_i , col_j]
+    }
+  }
+  MC_seed <- MC_seed + 1
+  set.seed(MC_seed)
+  shuffle_vec_rand <- sample(shuffle_vec, replace = FALSE, prob = NULL)
+  k_shuffle_vec <- 0
+  for (col_j in 1:input_data_col) {
+    if (MC_col_fixed[col_j] == 0) {
+      k_shuffle_vec <- k_shuffle_vec + 1
+      input_data_nna[row_i , col_j] <- shuffle_vec_rand[k_shuffle_vec]
+    }
+  }
+}
+
+
+
+
+
+
+
+#      Hierachical Clustering for the Cophenetic Correlation Coefficients
+
+
+
+
+# Transpose the data so the sample will become the rows and genes/proteins will become the columns
+input_data_nna_t <- t(input_data_nna)
+rownames(input_data_nna_t)
+
+# Calculate distances: Euclidean, Manhattan, Pearson correlation coefficient
+d_e <- dist(input_data_nna_t, method = "euclidean")
+d_m <- dist(input_data_nna_t, method = "manhattan")
+c_2 = cor(input_data_nna, method="pearson")
+d_p <- as.dist(1 - c_2)
+
+# Linkages: "average" (= UPGMA), "ward.D2", "complete", "single", "centroid" (= UPGMC)
+# Hierarchical clustering using Euclidean distance
+hc_e_a <- hclust(d_e, method = "average" ) 
+hc_e_w <- hclust(d_e, method = "ward.D2" ) 
+hc_e_co <- hclust(d_e, method = "complete" ) 
+hc_e_s <- hclust(d_e, method = "single" ) 
+hc_e_ce <- hclust(d_e, method = "centroid" ) 
+# Hierarchical clustering using Manhattan distance
+hc_m_a <- hclust(d_m, method = "average" ) 
+hc_m_w <- hclust(d_m, method = "ward.D2" ) 
+hc_m_co <- hclust(d_m, method = "complete" ) 
+hc_m_s <- hclust(d_m, method = "single" ) 
+hc_m_ce <- hclust(d_m, method = "centroid" ) 
+# Hierarchical clustering using Pearson correlation coefficient
+hc_p_a <- hclust(d_p, method = "average" )
+hc_p_w <- hclust(d_p, method = "ward.D2" )
+hc_p_co <- hclust(d_p, method = "complete" )
+hc_p_s <- hclust(d_p, method = "single" )
+hc_p_ce <- hclust(d_p, method = "centroid" )
+
+# The Cophenetic Correlation Coefficient (CCC) is a measure of how faithfully a dendrogram preserves the pairwise distances between the original unmodeled data points.
+res.coph_e_a <- cophenetic(hc_e_a)
+res.coph_e_w <- cophenetic(hc_e_w)
+res.coph_e_co <- cophenetic(hc_e_co)
+res.coph_e_s <- cophenetic(hc_e_s)
+res.coph_e_ce <- cophenetic(hc_e_ce)
+
+res.coph_m_a <- cophenetic(hc_m_a)
+res.coph_m_w <- cophenetic(hc_m_w)
+res.coph_m_co <- cophenetic(hc_m_co)
+res.coph_m_s <- cophenetic(hc_m_s)
+res.coph_m_ce <- cophenetic(hc_m_ce)
+
+res.coph_p_a <- cophenetic(hc_p_a)
+res.coph_p_w <- cophenetic(hc_p_w)
+res.coph_p_co <- cophenetic(hc_p_co)
+res.coph_p_s <- cophenetic(hc_p_s)
+res.coph_p_ce <- cophenetic(hc_p_ce)
+
+# Correlations between the distance matrix and the Cophenetic Correlations
+# are compared for 'euclidean', 'manhattan', and 'pearson' distances to see which
+# one is the best.  The higher the correlation, the better the HCA.
+# Create a dataframe to store the CCC values from each distance and linkage combination
+distance = c("euclidean", "euclidean", "euclidean", "euclidean", "euclidean",
+             'manhattan', 'manhattan', 'manhattan', 'manhattan', 'manhattan', 
+             'pearson', 'pearson', 'pearson', 'pearson', 'pearson')
+linkage = c('average', 'ward.D2', 'complete', 'single', 'centroid',
+            'average', 'ward.D2', 'complete', 'single', 'centroid',
+            'average', 'ward.D2', 'complete', 'single', 'centroid')
+distance_matrix = c('e_a', 'e_w', 'e_co', 'e_s', 'e_ce',
+                    'm_a', 'm_w', 'm_co', 'm_s', 'm_ce',
+                    'p_a', 'p_w', 'p_co', 'p_s', 'p_ce')
+CCC = c(
+  cor(d_e, res.coph_e_a),
+  cor(d_e, res.coph_e_w),
+  cor(d_e, res.coph_e_co),
+  cor(d_e, res.coph_e_s),
+  cor(d_e, res.coph_e_ce),
+
+  cor(d_m, res.coph_m_a),
+  cor(d_m, res.coph_m_w),
+  cor(d_m, res.coph_m_co),
+  cor(d_m, res.coph_m_s),
+  cor(d_m, res.coph_m_ce),
+
+  cor(d_p, res.coph_p_a),
+  cor(d_p, res.coph_p_w),
+  cor(d_p, res.coph_p_co),
+  cor(d_p, res.coph_p_s),
+  cor(d_p, res.coph_p_ce))
+
+CCC_df = data.frame(distance, linkage, distance_matrix, CCC) 
+CCC_df_ranked = CCC_df[order(-CCC_df$CCC),]
+
+
+# Find the best distance-linkage combination
+CCC_df_ranked_top = CCC_df_ranked[1,]
+
+# Get the hierarchical clustering object generated using the best distance-linkage
+hc = get(paste0('hc_', CCC_df_ranked_top$distance_matrix))
+
+
+
+
+
+
+
+#      Hierachical Clustering for the Silhouette Coefficients
+
+
+
+
+
+
+
+# Calculate the maximum possible number of clusters
+# Note that eclust() -> hcut() might crash if this value is > 20
+# Note that eclust() -> hcut() might crash if this value is > (input_data_col - 1)
+MaxPosNumClusters <- min(c(20 , (input_data_col - 1) ))
+
+
+# eclust() - Visual enhancement of clustering analysis for enhancing the
+# workflow of clustering analyses and ggplot2-based data visualization
+hc.res_a <- eclust(input_data_nna_t, FUNcluster = "hclust", k = NULL, k.max = MaxPosNumClusters, stand = FALSE, graph = FALSE, hc_metric = CCC_df_ranked_top$distance, hc_method = CCC_df_ranked_top$linkage, nboot=100, seed=78)
+
+# Get the estimated optimal number of clusters from eclust() gap statistics
+nbclust_GapStat <- hc.res_a$nbclust
+
+# If the estimated optimal number of clusters = 1, then the eclust() gap statistic
+# method failed to identify an optimal number of clusters.
+# Use the silhouette method (max of mean of SC values) (Charrad et al 2014).
+if (nbclust_GapStat == 1) {
+
+# Make a data frame for the mean SC at each possible number of clusters
+numClust_i <- 1:MaxPosNumClusters
+numClust_AvgSC <- rep(0.001, MaxPosNumClusters)
+numClust_df <- data.frame(numClust_i, numClust_AvgSC) 
+
+# Loop through each possible number of clusters and save the mean SC 
+for (i in 2:MaxPosNumClusters) {
+    
+    hc.res_a <- eclust(input_data_nna_t, FUNcluster = "hclust", k = i, stand = FALSE, graph = FALSE, hc_metric = CCC_df_ranked_top$distance, hc_method = CCC_df_ranked_top$linkage, nboot=100, seed=78)
+    
+    # Silhouette information
+    silinfo_a <- hc.res_a$silinfo
+    numClust_df[i, 2] <- silinfo_a$avg.width
+    
+    }
+
+# Sort rows by the mean SC (descending)
+numClust_df_ranked <- numClust_df[order(-numClust_df$numClust_AvgSC),]
+
+# Find the estimated optimal number of clusters
+numClust_df_ranked_top <- numClust_df_ranked[1,]
+
+# Perform an HCA and calculate SC values using the estimated optimal number of clusters
+hc.res_a <- eclust(input_data_nna_t, FUNcluster = "hclust", k = numClust_df_ranked_top[1], stand = FALSE, graph = FALSE, hc_metric = CCC_df_ranked_top$distance, hc_method = CCC_df_ranked_top$linkage, nboot=100, seed=78)
+
+}
+
+
+# Silhouette information
+silinfo_a <- hc.res_a$silinfo
+
+# The Silhouette coefficient of each sample
+sil_a <- hc.res_a$silinfo$widths[, 1:3]
+
+# Identify the potential outliers
+neg_sil_index_a <- which(sil_a[, 'sil_width'] < SC_max)
+
+# Get the potential outlier sample names
+hcOutliers = rownames(sil_a[neg_sil_index_a, , drop = FALSE])
+
+
+
+
+
+#      Robust PCA algorithm (robpca)
+
+
+
+
+library(rospca) 
+
+# Perform Robust PCA (robpca)
+resR0 <- robpca(input_data_nna_t, k = 0, crit.pca.distances = robpca_prob, ndir = 5000, skew = FALSE)
+
+# Get the robpca results (outliers are 'FALSE')
+resR0_flag <- as.data.frame(resR0$flag.all)
+
+resR0_flag$sample <- row.names(resR0_flag)
+colnames(resR0_flag) <- c('regular', 'sample')
+resR0_flag$regular <- as.numeric(resR0_flag$regular)
+
+# Get the outlier sample names
+rosOutliers = resR0_flag[resR0_flag$regular == 0,]$sample
+
+
+
+
+
+#      Robust PCA (PcaGrid)
+
+
+
+
+
+library(rrcov)
+
+# Perform a Robust PCA (PcaGrid)
+pc <- PcaGrid(input_data_nna_t, crit.pca.distances = PcaGrid_prob)
+
+# Get the results (outliers = FALSE)
+pc_flag <- as.data.frame(pc$flag)
+
+pc_flag$sample <- row.names(pc_flag)
+colnames(pc_flag) <- c('regular', 'sample')
+pc_flag$regular <- as.numeric(pc_flag$regular)
+
+# Get the outlier sample names
+pcOutliers = pc_flag[pc_flag$regular == 0,]$sample
+
+
+
+
+
+#      Summary of the Results
+
+
+
+
+# The samples that satisfied all four criteria (CCC, SC, robpca, PcaGrid) for an outlier:
+Num_All_Criteria_Outliers <- 0
+if (CCC_df_ranked_top$CCC >= CCC_min) {
+  All_Criteria_Outliers <- intersect(intersect(hcOutliers, rosOutliers), pcOutliers)
+  Num_All_Criteria_Outliers <- NROW(All_Criteria_Outliers)
+  }
+
+num_MC_Outliers <- num_MC_Outliers + Num_All_Criteria_Outliers
+
+
+# End the Monte Carlo test FOR loop
+}
+
+```
+<br>
+
+## 3. Monte Carlo test results
+
+The number of tests and the number of outliers are displayed.
+
+```{r FinalMC, warning=FALSE, message=FALSE, fig.width=12, fig.height=6}
+
+# The number of Monte Carlo tests:
+num_MC_Tests
+
+# The total number of outliers:
+num_MC_Outliers
+
+# The estimated outlier detection false positive rate (i.e., the probability of falsely identifying an outlier):
+MC_est_FPR <- num_MC_Outliers / num_MC_Tests
+MC_est_FPR
+
+
+
+
+```
+
