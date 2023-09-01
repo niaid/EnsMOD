@@ -10,7 +10,7 @@ Here we describe our R script and R Shiny application for <b>Ens</b>emble <b>M</
 
 If you used EnsMOD, please cite our publication:  
 EnsMOD: A Software Program for Omics Sample Outlier Detection  
-Manes et al 2023 J Comput Biol, in press  
+Manes et al 2023 J Comput Biol 30(6):726-735  
 https://pubmed.ncbi.nlm.nih.gov/37042708/  
 https://doi.org/10.1089/cmb.2022.0243
 
